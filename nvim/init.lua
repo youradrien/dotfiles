@@ -234,6 +234,8 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  --'ya2s/nvim-cursorline', -- HIGHLIGHT SELECTED VARIABLE
+  'RRethy/vim-illuminate',
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -905,6 +907,10 @@ require('lazy').setup({
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
       },
+      refactor = {
+        highlight_definitions = { enable = true },
+        highlight_current_scope = { enable = true }, -- Highlight the current scope
+      },
       indent = { enable = true, disable = { 'ruby' } },
     },
     -- There are additional nvim-treesitter modules that you can use to interact
@@ -926,8 +932,8 @@ require('lazy').setup({
   --
   -- require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
@@ -968,4 +974,25 @@ require('lazy').setup({
 vim.cmd [[highlight Normal guibg=NONE]]
 -- vim.cmd [[highlight LineNr guibg=NONE guifg=NONE]]
 vim.cmd [[highlight SignColumn guibg=NONE]]
+-- Make Neo-tree background transparent
+vim.cmd [[highlight NeoTreeNormal guibg=NONE]] -- Transparent background for Neo-tree's main window
+vim.cmd [[highlight NeoTreeNormalNC guibg=NONE]] -- Transparent background for Neo-tree's non-current window
+vim.cmd [[highlight NeoTreeIndentMarker guibg=NONE]] -- Transparent background for Neo-tree's indent markers
+vim.cmd [[highlight NeoTreeRootName guibg=NONE]] -- Transparent background for Neo-tree's root name
+vim.cmd [[highlight NeoTreeTabActive guibg=NONE]] -- Transparent background for Neo-tree's active tab
+vim.cmd [[highlight NeoTreeTabInactive guibg=NONE]] -- Transparent background for Neo-tree's inactive tab
+vim.cmd [[highlight NeoTreeWinSeparator guibg=NONE guifg=NONE]] -- Transparent background for Neo-tree window separator
+
+-- Reapply transparency whenever focus changes between windows
+vim.cmd [[autocmd WinEnter,WinLeave * highlight Normal guibg=NONE]]
+vim.cmd [[autocmd WinEnter,WinLeave * highlight StatusLine guibg=NONE]]
+vim.cmd [[autocmd WinEnter,WinLeave * highlight StatusLineNC guibg=NONE]]
 -- vim: ts=2 sts=2 sw=2 et
+--
+--vim.cmd [[
+--  augroup highlight_var
+--    autocmd!
+--    autocmd CursorHold * lua vim.lsp.buf.document_highlight()
+--    autocmd CursorMoved * lua vim.lsp.buf.clear_references()
+--  augroup END
+--]]
