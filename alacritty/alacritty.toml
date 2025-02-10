@@ -1,0 +1,31 @@
+
+[env]
+TERM = "xterm-256color"
+WINIT_UNIX_BACKEND = "x11"
+
+[window]
+padding.x = 10
+padding.y = 10
+opacity = 0.68
+blur = true
+decorations = "Full"
+decorations_theme_variant = "Dark"
+dynamic_title = true	
+dynamic_padding = true
+
+
+[font]
+size = 13
+normal = { family = "SFMono Nerd Font", style = "Regular" }
+bold = { family = "SFMono Nerd Font", style = "Bold" }
+italic = { family = "SF Mono", style = "Italic" }
+
+[general]
+import = [
+	"~/.config/alacritty/themes/themes/palenight.toml"
+]
+
+[terminal.shell]
+	program = "/bin/zsh"
+	args = ["--login", "-c", "neofetch; exec zsh"]
+
