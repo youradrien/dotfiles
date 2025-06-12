@@ -81,8 +81,7 @@ If you experience any errors while trying to install kickstart, run `:checkhealt
 I hope you enjoy your Neovim journey,
 - TJ
 
-P.S. You can delete this when you're done too. It's your config now! :)
---]]
+
 
 -- Set <space> as the leader key
 -- See `:help mapleader`
@@ -101,14 +100,13 @@ vim.g.have_nerd_font = true
 -- Make line numbers default
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
 -- vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 
 -- Don't show the mode, since it's already in the status line
-vim.opt.showmode = false
+-- vim.opt.showmode = false
 
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
@@ -120,7 +118,6 @@ end)
 
 -- Enable break indent
 vim.opt.breakindent = true
-
 -- Save undo history
 vim.opt.undofile = true
 
@@ -140,6 +137,7 @@ vim.opt.timeoutlen = 1
 -- Configure how new splits should be opened
 vim.opt.splitright = true
 vim.opt.splitbelow = true
+vim.o.virtualedit = 'onemore'
 
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
@@ -154,7 +152,7 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 3
+vim.opt.scrolloff = 13
 
 -- J.
 vim.o.scroll = 1 -- Scroll by 1 line at a time
@@ -179,23 +177,12 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
--- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
-
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-
--- [[ Basic Autocommands ]]
---  See `:help lua-guide-autocommands`
 
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
@@ -339,6 +326,23 @@ require('lazy').setup({
   -- you do for a plugin at the top level, you can do for a dependency.
   --
   -- Use the `dependencies` key to specify the dependencies of a particular plugin
+
+  {
+    'akinsho/bufferline.nvim',
+    version = '*',
+    dependencies = 'nvim-tree/nvim-web-devicons',
+    config = function()
+      require('bufferline').setup {
+        options = {
+          mode = 'buffers', -- "tabs" is also available
+          diagnostics = 'nvim_lsp',
+          show_buffer_close_icons = true,
+          show_close_icon = false,
+          separator_style = 'thin', -- "slant" | "thick" | "thin" | { 'left', 'right' }
+        },
+      }
+    end,
+  },
 
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
@@ -611,7 +615,20 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
+        clangd = {
+          settings = {
+            c = {
+              completion = {
+                callSnipper = 'Replace',
+              },
+            },
+            cpp = {
+              completion = {
+                callSnipper = 'Replace',
+              },
+            },
+          },
+        },
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -737,12 +754,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
       },
       'saadparwaiz1/cmp_luasnip',
@@ -788,14 +805,12 @@ require('lazy').setup({
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
-          --['<Tab>'] = cmp.mapping.select_next_item(),
-          --['<S-Tab>'] = cmp.mapping.select_prev_item(),
-
+          ['<CR>'] = cmp.mapping.confirm { select = true },
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
           ['<C-Space>'] = cmp.mapping.complete {},
+          ['<Tab>'] = cmp.mapping.confirm { select = true }, -- ← Tab confirms
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
           --  So if you have a snippet that's like:
@@ -815,9 +830,6 @@ require('lazy').setup({
               luasnip.jump(-1)
             end
           end, { 'i', 's' }),
-
-          -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
-          --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
         },
         sources = {
           {
@@ -846,7 +858,6 @@ require('lazy').setup({
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-night'
 
-      -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
     end,
   },
@@ -907,10 +918,6 @@ require('lazy').setup({
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
       },
-      refactor = {
-        highlight_definitions = { enable = true },
-        highlight_current_scope = { enable = true }, -- Highlight the current scope
-      },
       indent = { enable = true, disable = { 'ruby' } },
     },
     -- There are additional nvim-treesitter modules that you can use to interact
@@ -927,11 +934,9 @@ require('lazy').setup({
 
   -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
   --
-  --  Here are some example plugins that I've included in the Kickstart repository.
-  --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
@@ -996,3 +1001,64 @@ vim.cmd [[autocmd WinEnter,WinLeave * highlight StatusLineNC guibg=NONE]]
 --    autocmd CursorMoved * lua vim.lsp.buf.clear_references()
 --  augroup END
 --]]
+--
+--
+--
+--
+vim.cmd [[
+  highlight NvimTreeNormal guibg=NONE ctermbg=NONE
+  highlight NvimTreeNormalNC guibg=NONE ctermbg=NONE
+  highlight NvimTreeEndOfBuffer guibg=NONE ctermbg=NONE
+]]
+
+vim.api.nvim_create_autocmd('ColorScheme', {
+  pattern = '*',
+  callback = function()
+    vim.cmd [[
+      highlight Normal guibg=NONE ctermbg=NONE
+      highlight NvimTreeNormal guibg=NONE ctermbg=NONE
+      highlight NvimTreeNormalNC guibg=NONE ctermbg=NONE
+      highlight NvimTreeEndOfBuffer guibg=NONE ctermbg=NONE
+    ]]
+  end,
+})
+
+vim.api.nvim_set_hl(0, 'BufferLineFill', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineBackground', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineBufferSelected', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineBufferVisible', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineTabSelected', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineTab', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineTabClose', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineCloseButton', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineCloseButtonSelected', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineSeparator', { bg = 'NONE', fg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineSeparatorSelected', { bg = 'NONE', fg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineSeparatorVisible', { bg = 'NONE', fg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineDevIcon', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineDevIconSelected', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineDevIconVisible', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'BufferLineDevIcon', { fg = '#999999', bg = 'NONE' })
+
+-- Clear all BufferLineDevIcon highlights dynamically
+vim.api.nvim_create_autocmd('ColorScheme', {
+  callback = function()
+    for _, group in ipairs(vim.fn.getcompletion('BufferLineDevIcon', 'highlight')) do
+      vim.api.nvim_set_hl(0, group, { fg = 'NONE', bg = 'NONE' })
+    end
+  end,
+})
+-- Trigger once on load
+vim.cmd 'doautocmd ColorScheme'
+
+vim.cmd [[
+  highlight BufferLineBufferSelected guibg=NONE guifg=NONE gui=bold
+]]
+
+-- Set keymap for <Space>ff to open find_files
+vim.api.nvim_set_keymap(
+  'n', -- normal mode
+  '<Space>ff', -- key combination
+  "<cmd>lua require('telescope.builtin').find_files()<CR>", -- command to run
+  { noremap = true, silent = true } -- options: non-recursive, silent
+)
