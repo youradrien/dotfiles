@@ -22,6 +22,8 @@ vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 2
+vim.o.number = true
+vim.opt.signcolumn = "yes:1"  -- or "yes:2" for 2 columns wide
 
 -- J.
 vim.o.scroll = 1 -- Scroll by 1 line at a time
@@ -44,14 +46,17 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
--- Highlight when yanking (copying) text
-vim.api.nvim_create_autocmd('TextYankPost', {
-  desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
-  callback = function()
-    vim.highlight.on_yank()
-  end,
+
+-- highlight when yanking (copying) text
+vim.api.nvim_create_autocmd('TextYankPost',
+  {
+    desc = 'Highlight when yanking (copying) text',
+    group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
+    callback = function()
+      vim.highlight.on_yank()
+    end,
 })
+
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -64,38 +69,42 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
--- [[ Configure and install plugins ]]
---
---
--- NOTE: Here is where you install your plugins.
-require('lazy').setup {
-  -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
-  --'ya2s/nvim-cursorline', -- HIGHLIGHT SELECTED VARIABLE
+
+
+-- here is where you install your plugins.
+require('lazy').setup
+{
+  -- sleuth: detect tabstop, shiftwidth automatically
+  'tpope/vim-sleuth',
+
+
+  -- cursorline: underline SELECTED VARIABLES
+  --'ya2s/nvim-cursorline',
+
+
+  -- illuminate: gitsigns [+, -, `]`]
   'RRethy/vim-illuminate',
-  --
-  --
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
+  {
     'lewis6991/gitsigns.nvim',
     opts = {
       signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
+        add          = { text = '+' },
+        change       = { text = '~' },
+        delete       = { text = '_' },
+        topdelete    = { text = '' },
+        changedelete = { text = '' },
+        untracked    = { text = '' },
       },
-    },
+      signcolumn = true, -- Keep signcolumn on so the '+' shows up
+    }
   },
 
-  -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
+
   --
   -- This is often very useful to both group configuration, as well as handle
   -- lazy loading plugins that don't need to be loaded immediately at startup.
-  --
   -- For example, in the following configuration, we use:
   --  event = 'VimEnter'
-  --
   -- which loads which-key before all the UI elements are loaded. Events can be
   -- normal autocommands events (`:help autocmd-events`).
   --
@@ -103,8 +112,6 @@ require('lazy').setup {
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     opts = {
-      -- delay between pressing a key and opening which-key (milliseconds)
-      -- this setting is independent of vim.opt.timeoutlen
       delay = 0,
       icons = {
         -- set icon mappings to true if you have a Nerd Font
@@ -143,7 +150,6 @@ require('lazy').setup {
         },
       },
 
-      -- Document existing key chains
       spec = {
         { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
         { '<leader>d', group = '[D]ocument' },
@@ -160,9 +166,9 @@ require('lazy').setup {
   --
   -- The dependencies are proper plugin specifications as well - anything
   -- you do for a plugin at the top level, you can do for a dependency.
-  --
-  -- Use the `dependencies` key to specify the dependencies of a particular plugin
 
+
+  -- bufferline (windows tabs)
   {
     'akinsho/bufferline.nvim',
     version = '*',
@@ -180,19 +186,19 @@ require('lazy').setup {
     end,
   },
 
-  { -- Fuzzy Finder (files, lsp, etc)
+
+  -- telescope (fuzzy Finder (files, lsp, etc))
+  {
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
     branch = '0.1.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
-      { -- If encountering errors, see telescope-fzf-native README for installation instructions
+      {
         'nvim-telescope/telescope-fzf-native.nvim',
-
         -- `build` is used to run some command when the plugin is installed/updated.
         -- This is only run then, not every time Neovim starts up.
         build = 'make',
-
         -- `cond` is a condition used to determine whether this plugin should be
         -- installed and loaded.
         cond = function()
@@ -200,10 +206,9 @@ require('lazy').setup {
         end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
-
-      -- Useful for getting pretty icons, but requires a Nerd Font.
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
     },
+
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
       -- it can fuzzy find! It's more than just a "file finder", it can search
@@ -213,7 +218,6 @@ require('lazy').setup {
       -- [[ Configure Telescope ]]
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
-        --
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
@@ -222,7 +226,6 @@ require('lazy').setup {
         },
       }
 
-      -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
 
@@ -239,7 +242,8 @@ require('lazy').setup {
     end,
   },
 
-  -- LSP Plugins
+
+  -- LSP plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
     -- used for completion, annotations and signatures of Neovim apis
@@ -247,26 +251,22 @@ require('lazy').setup {
     ft = 'lua',
     opts = {
       library = {
-        -- Load luvit types when the `vim.uv` word is found
         { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
       },
     },
   },
+
+
+  -- LSP configuration
   {
-    -- Main LSP Configuration
     'neovim/nvim-lspconfig',
     dependencies = {
-      -- Automatically install LSPs and related tools to stdpath for Neovim
-      -- Mason must be loaded before its dependents so we need to set it up here.
-      -- NOTE: `opts = {}` is the same as calling `require('mason').setup({})`
       { 'williamboman/mason.nvim', opts = {} },
       'williamboman/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
-      -- Useful status updates for LSP.
       { 'j-hui/fidget.nvim', opts = {} },
 
-      -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
     },
     config = function()
@@ -274,24 +274,13 @@ require('lazy').setup {
       -- and language tooling communicate in a standardized fashion.
       --
       -- In general, you have a "server" which is some tool built to understand a particular
-      -- language (such as `gopls`, `lua_ls`, `rust_analyzer`, etc.). These Language Servers
-      -- (sometimes called LSP servers, but that's kind of like ATM Machine) are standalone
-      -- processes that communicate with some "client" - in this case, Neovim!
-      --
+      -- language (such as `gopls`, `lua_ls`, `rust_analyzer`, etc.).       --
       -- LSP provides Neovim with features like:
-      --  - Go to definition
-      --  - Find references
-      --  - Autocompletion
-      --  - Symbol Search
-      --  - and more!
+      --  - Go to definition, find references, autocompletion, symbol Search and more...
       --
       -- Thus, Language Servers are external tools that must be installed separately from
       -- Neovim. This is where `mason` and related plugins come into play.
       --
-      --  This function gets run when an LSP attaches to a particular buffer.
-      --    That is to say, every time a new file is opened that is associated with
-      --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
-      --    function will be executed to configure the current buffer
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
@@ -358,10 +347,6 @@ require('lazy').setup {
             })
           end
 
-          -- The following code creates a keymap to toggle inlay hints in your
-          -- code, if the language server you are using supports them
-          --
-          -- This may be unwanted, since they displace some of your code
           if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
             map('<leader>th', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
@@ -378,7 +363,6 @@ require('lazy').setup {
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
-      --
       --  Add any additional override configuration in the following tables. Available keys are:
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
@@ -401,10 +385,8 @@ require('lazy').setup {
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
-        --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
-
         lua_ls = {
           -- cmd = { ... },
           -- capabilities = {},
@@ -417,16 +399,12 @@ require('lazy').setup {
           },
         },
       }
-
-      -- Ensure the servers and tools above are installed
-      --
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format Lua code
+        'stylua', 
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
-
-      require('mason-lspconfig').setup {
+      require('mason-lspconfig').setup{
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
@@ -441,17 +419,15 @@ require('lazy').setup {
     end,
   },
 
-  { -- Autocompletion
+
+  -- Autocompletion
+  {
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
     dependencies = {
-      -- Snippet Engine & its associated nvim-cmp source
       {
         'L3MON4D3/LuaSnip',
         build = (function()
-          -- Build Step is needed for regex support in snippets.
-          -- This step is not supported in many windows environments.
-          -- Remove the below condition to re-enable on windows.
           if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
             return
           end
@@ -459,7 +435,6 @@ require('lazy').setup {
         end)(),
         dependencies = {
           -- `friendly-snippets` contains a variety of premade snippets.
-          --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
           {
             'rafamadriz/friendly-snippets',
@@ -470,15 +445,10 @@ require('lazy').setup {
         },
       },
       'saadparwaiz1/cmp_luasnip',
-
-      -- Adds other completion capabilities.
-      --  nvim-cmp does not ship with all sources by default. They are split
-      --  into multiple repos for maintenance purposes.
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
     },
     config = function()
-      -- See `:help cmp`
       local cmp = require 'cmp'
       local luasnip = require 'luasnip'
       luasnip.config.setup {}
@@ -491,24 +461,16 @@ require('lazy').setup {
         },
         completion = { completeopt = 'menu,menuone,noinsert' },
 
-        -- For an understanding of why these mappings were
-        -- chosen, you will need to read `:help ins-completion`
-        --
         mapping = cmp.mapping.preset.insert {
           -- Select the [n]ext item
           ['<C-n>'] = cmp.mapping.select_next_item(),
           -- Select the [p]revious item
           ['<C-p>'] = cmp.mapping.select_prev_item(),
-
           -- Scroll the documentation window [b]ack / [f]orward
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
           ['<C-f>'] = cmp.mapping.scroll_docs(4),
-
           -- Accept ([y]es) the completion.
-          --  This will auto-import if your LSP supports it.
-          --  This will expand snippets if the LSP sent a snippet.
           ['<C-y>'] = cmp.mapping.confirm { select = true },
-
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
           -- ['<CR>'] = cmp.mapping.confirm { select = true },
@@ -516,7 +478,6 @@ require('lazy').setup {
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
           -- ['<C-Space>'] = cmp.mapping.complete {},
-
           -- <c-l> will move you to the right of each of the expansion locations.
           -- <c-h> is similar, except moving you backwards.
           ['<C-l>'] = cmp.mapping(function()
@@ -533,7 +494,6 @@ require('lazy').setup {
         sources = {
           {
             name = 'lazydev',
-            -- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
             group_index = 0,
           },
           { name = 'nvim_lsp' },
@@ -544,24 +504,37 @@ require('lazy').setup {
     end,
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+
+  -- nvim colorscheme
+  {
+    -- to see what colorschemes are already installed use `:Telescope colorscheme`.
     'folke/tokyonight.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
+      -- like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-night'
-
       vim.cmd.hi 'Comment gui=none'
     end,
   },
 
-  -- Highlight todo, notes, etc in comments
+  -- airline
+  {
+    'vim-airline/vim-airline',
+    dependencies = {
+      'vim-airline/vim-airline-themes',
+    },
+    init = function()
+      -- theme 
+      vim.g.airline_theme = 'zenburn'
+
+      -- Optional: Enable powerline fonts if you use them
+      vim.g.airline_powerline_fonts = 1
+    end,
+  },
+
+
+  -- highlight todo, notes, etc in comments
   {
     'folke/todo-comments.nvim',
     event = 'VimEnter',
@@ -569,7 +542,8 @@ require('lazy').setup {
     opts = { signs = false },
   },
 
-  -- Collection of various small independent plugins/modules
+
+  -- collection of various small independent plugins/modules
   {
     'echasnovski/mini.nvim',
     config = function()
@@ -577,18 +551,17 @@ require('lazy').setup {
       require('mini.ai').setup { n_lines = 500 }
       -- add/delete/replace surroundings (brackets, quotes, etc.)
       require('mini.surround').setup()
-
-      -- Simple and easy statusline.
     end,
   },
 
-  { -- Highlight, edit, and navigate code
+
+  -- highlight, edit, and navigate code
+  {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
+    main = 'nvim-treesitter.configs',
     opts = {
       ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
-      -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
         enable = true,
@@ -606,6 +579,7 @@ require('lazy').setup {
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
+
 
   -- colored indented parentheses
   {
@@ -632,7 +606,9 @@ require('lazy').setup {
       }
     end,
   },
-  --
+
+
+  -- treesitter context 
   {
     'nvim-treesitter/nvim-treesitter-context',
     config = function()
@@ -647,17 +623,13 @@ require('lazy').setup {
     end,
   },
 
-  -- The following comments only work if you have downloaded the kickstart repo.
-  -- require 'kickstart.plugins.debug',
+
+  -- following comments only work if you have downloaded the kickstart repo.
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
-  --
-  --
-  -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
-  -- you can continue same window with `<space>sr` which resumes last telescope search
 }
 
 vim.cmd [[highlight Normal guibg=NONE]]
@@ -676,9 +648,6 @@ vim.cmd [[highlight NeoTreeWinSeparator guibg=NONE guifg=NONE]] -- Transparent b
 vim.cmd [[autocmd WinEnter,WinLeave * highlight Normal guibg=NONE]]
 vim.cmd [[autocmd WinEnter,WinLeave * highlight StatusLine guibg=NONE]]
 vim.cmd [[autocmd WinEnter,WinLeave * highlight StatusLineNC guibg=NONE]]
--- vim: ts=2 sts=2 sw=2 et
---
---
 vim.cmd [[
   highlight NvimTreeNormal guibg=NONE ctermbg=NONE
   highlight NvimTreeNormalNC guibg=NONE ctermbg=NONE
@@ -697,6 +666,8 @@ vim.api.nvim_create_autocmd('ColorScheme', {
   end,
 })
 
+
+-- bufferline transparency
 vim.api.nvim_set_hl(0, 'BufferLineFill', { bg = 'NONE' })
 vim.api.nvim_set_hl(0, 'BufferLineBackground', { bg = 'NONE' })
 vim.api.nvim_set_hl(0, 'BufferLineBufferSelected', { bg = 'NONE' })
@@ -713,8 +684,6 @@ vim.api.nvim_set_hl(0, 'BufferLineDevIcon', { bg = 'NONE' })
 vim.api.nvim_set_hl(0, 'BufferLineDevIconSelected', { bg = 'NONE' })
 vim.api.nvim_set_hl(0, 'BufferLineDevIconVisible', { bg = 'NONE' })
 vim.api.nvim_set_hl(0, 'BufferLineDevIcon', { fg = '#999999', bg = 'NONE' })
-
--- clear all BufferLineDevIcon highlights dynamically
 vim.api.nvim_create_autocmd('ColorScheme', {
   callback = function()
     for _, group in ipairs(vim.fn.getcompletion('BufferLineDevIcon', 'highlight')) do
@@ -722,17 +691,60 @@ vim.api.nvim_create_autocmd('ColorScheme', {
     end
   end,
 })
--- trigger once on load
+require('bufferline').setup {
+  highlights = {
+    background = {
+      fg = '#808080',
+      bg = 'NONE',
+    },
+    buffer_selected = {
+      fg = '#ffffff',
+      bg = 'NONE',
+      bold = true,
+    },
+    buffer_visible = {
+      fg = '#a0a0a0',
+      bg = 'NONE',
+    },
+  },
+}
 vim.cmd 'doautocmd ColorScheme'
 
 vim.cmd [[
   highlight BufferLineBufferSelected guibg=NONE guifg=NONE gui=bold
 ]]
 
--- keymap for <Space>ff to open find_files
+
+-- keymap for <Space>ff to open find_files telescope
 vim.api.nvim_set_keymap(
   'n', -- normal mode
   '<Space>ff', -- key combination
   "<cmd>lua require('telescope.builtin').find_files()<CR>", -- command to run
   { noremap = true, silent = true } -- options: non-recursive, silent
 )
+
+vim.cmd [[colorscheme tokyonight]]
+
+
+vim.cmd([[
+  " Set airline section background to NONE (transparent)
+  highlight! AirlineNormal guibg=NONE ctermbg=NONE
+  highlight! AirlineInsert guibg=NONE ctermbg=NONE
+  highlight! AirlineVisual guibg=NONE ctermbg=NONE
+  highlight! AirlineReplace guibg=NONE ctermbg=NONE
+  highlight! AirlineInactive guibg=NONE ctermbg=NONE
+
+  " Optional: Make airline text slightly dim to simulate blur
+  highlight! AirlineNormal guifg=#7aa2f7 gui=bold
+]])
+
+vim.cmd([[
+  function! CustomizeAirlineTheme()
+    let g:airline#themes#zenburn#palette.insert.airline_a = ['#00ff00', '#3f3f3f', 10, 239]
+  endfunction
+
+  augroup AirlineZenburnCustom
+    autocmd!
+    autocmd VimEnter * call CustomizeAirlineTheme()
+  augroup END
+]])
