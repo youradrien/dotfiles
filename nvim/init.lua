@@ -46,6 +46,7 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+vim.opt.showmode = false
 
 -- highlight when yanking (copying) text
 vim.api.nvim_create_autocmd('TextYankPost',
@@ -181,6 +182,15 @@ require('lazy').setup
           show_buffer_close_icons = true,
           show_close_icon = false,
           separator_style = 'thin', -- "slant" | "thick" | "thin" | { 'left', 'right' }
+          offsets = {
+            {
+              filetype = "neo-tree",
+              text = "Neo-tree", -- optional title in the offset
+              text_align = "left", -- or "center", "right"
+              separator = true, -- adds a vertical separator between Neo-tree and buffers
+              padding = 1,
+            }
+          },
         },
       }
     end,
@@ -210,10 +220,6 @@ require('lazy').setup
     },
 
     config = function()
-      -- Telescope is a fuzzy finder that comes with a lot of different things that
-      -- it can fuzzy find! It's more than just a "file finder", it can search
-      -- many different aspects of Neovim, your workspace, LSP, and more!
-      --
       --
       -- [[ Configure Telescope ]]
       require('telescope').setup {
@@ -277,9 +283,6 @@ require('lazy').setup
       -- language (such as `gopls`, `lua_ls`, `rust_analyzer`, etc.).       --
       -- LSP provides Neovim with features like:
       --  - Go to definition, find references, autocompletion, symbol Search and more...
-      --
-      -- Thus, Language Servers are external tools that must be installed separately from
-      -- Neovim. This is where `mason` and related plugins come into play.
       --
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
@@ -507,7 +510,6 @@ require('lazy').setup
 
   -- nvim colorscheme
   {
-    -- to see what colorschemes are already installed use `:Telescope colorscheme`.
     'folke/tokyonight.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     init = function()
@@ -517,6 +519,7 @@ require('lazy').setup
       vim.cmd.hi 'Comment gui=none'
     end,
   },
+
 
   -- airline
   {
@@ -530,9 +533,19 @@ require('lazy').setup
 
       -- Optional: Enable powerline fonts if you use them
       vim.g.airline_powerline_fonts = 1
+          -- Disable ALE integration
+      vim.g['airline#extensions#ale#enabled'] = 0
+
+      -- Disable whitespace warnings
+      vim.g['airline#extensions#whitespace#enabled'] = 0
+
+      -- Disable LSP-related diagnostics
+      vim.g['airline#extensions#lsp#enabled'] = 0
+
+      -- Optional: Disable Coc (if used)
+      vim.g['airline#extensions#coc#enabled'] = 0
     end,
   },
-
 
   -- highlight todo, notes, etc in comments
   {
@@ -543,7 +556,7 @@ require('lazy').setup
   },
 
 
-  -- collection of various small independent plugins/modules
+  -- various small independent plugins/modules
   {
     'echasnovski/mini.nvim',
     config = function()
@@ -561,7 +574,9 @@ require('lazy').setup
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs',
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 
+                            'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript' 
+      },
       auto_install = true,
       highlight = {
         enable = true,
@@ -572,12 +587,6 @@ require('lazy').setup
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
-    -- There are additional nvim-treesitter modules that you can use to interact
-    -- with nvim-treesitter. You should go explore a few and see what interests you:
-    --
-    --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-    --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-    --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
 
 
@@ -595,10 +604,10 @@ require('lazy').setup
           [''] = 'rainbow-delimiters',
         },
         highlight = {
-          'RainbowDelimiterRed',
+          -- 'RainbowDelimiterRed',
           'RainbowDelimiterYellow',
           'RainbowDelimiterBlue',
-          'RainbowDelimiterOrange',
+          -- 'RainbowDelimiterOrange',
           'RainbowDelimiterGreen',
           'RainbowDelimiterViolet',
           'RainbowDelimiterCyan',
@@ -614,9 +623,9 @@ require('lazy').setup
     config = function()
       require('treesitter-context').setup {
         enable = true,
-        max_lines = 3,
+        max_lines = 0,
         mode = 'cursor',
-        multiline_threshold = 1,
+        multiline_threshold = 20,
         separator = nil, -- disable dashed line under context
         zindex = 20,
       }
@@ -628,8 +637,82 @@ require('lazy').setup
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  -- require 'kickstart.plugins.neo-tree', <--- did my own
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x", -- or "v2.x" if you prefer stable
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons", -- optional, for file icons
+      "MunifTanjim/nui.nvim",
+    },
+    config = function()
+      require("neo-tree").setup({
+        close_if_last_window = true,
+        popup_border_style = "rounded",
+        enable_git_status = true,
+        enable_diagnostics = true,
+        sources = { "filesystem", "buffers", "git_status" },
+        default_component_configs = {
+          indent = {
+            with_markers = true,
+            indent_marker = "│",
+            last_indent_marker = "└",
+            indent_size = 2,
+          },
+          icon = {
+            folder_closed = "",
+            folder_open = "",
+            folder_empty = "",
+          },
+          git_status = {
+            symbols = {
+              added     = "A",
+              modified  = "M",
+              deleted   = "D",
+              renamed   = "R",
+              untracked = "U",
+              ignored   = "I",
+              unstaged  = "✗",
+              staged    = "✓",
+              conflict  = "!",
+            }
+          },
+        },
+        window = {
+          position = "left",
+          width = 30,
+          mappings = {
+            ["<space>"] = "toggle_node",
+            ["<cr>"] = "open",
+            ["S"] = "open_split",
+            ["s"] = "open_vsplit",
+            ["t"] = "open_tabnew",
+            ["C"] = "close_node",
+            ["z"] = "close_all_nodes",
+            ["a"] = "add",
+            ["d"] = "delete",
+            ["r"] = "rename",
+            ["c"] = "copy_to_clipboard",
+            ["x"] = "cut_to_clipboard",
+            ["p"] = "paste_from_clipboard",
+            ["q"] = "close_window",
+          }
+        },
+        filesystem = {
+          filtered_items = {
+            visible = false,
+            hide_dotfiles = true,
+            hide_gitignored = true,
+          },
+          follow_current_file = {
+            enabled = true,
+          },
+          use_libuv_file_watcher = true,
+        },
+      })
+    end
+  }
 }
 
 vim.cmd [[highlight Normal guibg=NONE]]
@@ -653,6 +736,7 @@ vim.cmd [[
   highlight NvimTreeNormalNC guibg=NONE ctermbg=NONE
   highlight NvimTreeEndOfBuffer guibg=NONE ctermbg=NONE
 ]]
+
 
 vim.api.nvim_create_autocmd('ColorScheme', {
   pattern = '*',
@@ -709,13 +793,13 @@ require('bufferline').setup {
   },
 }
 vim.cmd 'doautocmd ColorScheme'
-
 vim.cmd [[
   highlight BufferLineBufferSelected guibg=NONE guifg=NONE gui=bold
 ]]
 
 
--- keymap for <Space>ff to open find_files telescope
+
+-- keymap for <Space>ff to open telescope
 vim.api.nvim_set_keymap(
   'n', -- normal mode
   '<Space>ff', -- key combination
@@ -723,9 +807,62 @@ vim.api.nvim_set_keymap(
   { noremap = true, silent = true } -- options: non-recursive, silent
 )
 
-vim.cmd [[colorscheme tokyonight]]
+
+-- vim.cmd [[colorscheme tokyonight]]
+vim.cmd[[hi NvimTreeNormal guibg=NONE ctermbg=NONE]]
 
 
+-- make blank-indent thinner
+require("ibl").setup({
+  indent = {
+    char = "▏",  -- or "│", "▎", "¦", etc.
+  }
+})
+
+
+-- neotree bindings
+vim.keymap.set("n", "<C-t>", ":Neotree toggle<CR>", { desc = "Toggle NeoTree" })
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    vim.defer_fn(function()
+      require("neo-tree.command").execute({ toggle = false, dir = vim.loop.cwd() })
+    end, 100) -- delay in ms
+  end,
+})
+vim.api.nvim_create_autocmd({ "WinEnter", "WinLeave" }, {
+  callback = function()
+    vim.cmd([[
+      highlight Normal guibg=NONE
+      highlight NeoTreeNormal guibg=NONE
+      highlight NeoTreeNormalNC guibg=NONE
+      highlight NeoTreeWinSeparator guibg=NONE guifg=NONE
+      highlight NeoTreeIndentMarker guibg=NONE
+      highlight NeoTreeRootName guibg=NONE
+    ]])
+  end,
+})
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "*",
+  callback = function()
+    vim.api.nvim_set_hl(0, "NeoTreeNormal", { bg = "NONE" })
+    vim.api.nvim_set_hl(0, "NeoTreeNormalNC", { bg = "NONE" })
+    vim.api.nvim_set_hl(0, "NeoTreeEndOfBuffer", { bg = "NONE", fg = "NONE" })
+    vim.api.nvim_set_hl(0, "NeoTreeWinSeparator", { bg = "NONE", fg = "NONE" })
+    vim.api.nvim_set_hl(0, "NeoTreeIndentMarker", { bg = "NONE" })
+  end,
+})
+
+
+-- disable neo tree airline 
+vim.cmd([[
+  augroup DisableAirlineInNeoTree
+    autocmd!
+    autocmd FileType neo-tree let g:airline_disable_auto = 1 | let g:airline#extensions#disable_rtp_load = 1
+  augroup END
+]])
+
+
+-- airline theme
 vim.cmd([[
   " Set airline section background to NONE (transparent)
   highlight! AirlineNormal guibg=NONE ctermbg=NONE
@@ -737,7 +874,6 @@ vim.cmd([[
   " Optional: Make airline text slightly dim to simulate blur
   highlight! AirlineNormal guifg=#7aa2f7 gui=bold
 ]])
-
 vim.cmd([[
   function! CustomizeAirlineTheme()
     let g:airline#themes#zenburn#palette.insert.airline_a = ['#00ff00', '#3f3f3f', 10, 239]
@@ -748,3 +884,6 @@ vim.cmd([[
     autocmd VimEnter * call CustomizeAirlineTheme()
   augroup END
 ]])
+
+
+
