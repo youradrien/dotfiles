@@ -9,8 +9,6 @@ vim.opt.splitbelow = true
 vim.o.virtualedit = 'onemore'
 
 -- Sets how neovim will display certain whitespace characters in the editor.
---  See `:help 'list'`
---  and `:help 'listchars'`
 vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
@@ -21,7 +19,7 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 2
+vim.opt.scrolloff = 15
 vim.o.number = true
 vim.opt.signcolumn = "yes:1"  -- or "yes:2" for 2 columns wide
 
@@ -262,6 +260,12 @@ require('lazy').setup
     },
   },
 
+  {
+  "petertriho/nvim-scrollbar",
+  config = function()
+    require("scrollbar").setup()
+  end,
+},
 
   -- LSP configuration
   {
@@ -547,7 +551,7 @@ require('lazy').setup
     end,
   },
 
-  -- highlight todo, notes, etc in comments
+  -- highlight notes, comments
   {
     'folke/todo-comments.nvim',
     event = 'VimEnter',
@@ -556,7 +560,24 @@ require('lazy').setup
   },
 
 
-  -- various small independent plugins/modules
+  -- neoscroll
+  {
+    "karb94/neoscroll.nvim",
+    config = function()
+      require("neoscroll").setup({
+        -- Set `hide_cursor` to false if you want cursor to stay visible
+        hide_cursor = false,
+        stop_eof = true,
+        respect_scrolloff = true,
+        cursor_scrolls_alone = true,
+        easing_function = "linear", -- optional: "sine", "cubic", etc.
+        duration_multiplier = 1.0,   -- Global duration multiplier
+        performance_mode = false,    -- Disable "Performance Mode" on all buffers.
+      })
+    end
+  },
+
+  -- mini.nvim
   {
     'echasnovski/mini.nvim',
     config = function()
@@ -564,11 +585,13 @@ require('lazy').setup
       require('mini.ai').setup { n_lines = 500 }
       -- add/delete/replace surroundings (brackets, quotes, etc.)
       require('mini.surround').setup()
+      require('mini.pairs').setup()
+      -- require('mini.map').setup()
+      -- require('mini.indentscope').setup()
     end,
   },
 
-
-  -- highlight, edit, and navigate code
+  -- highlight  code
   {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
@@ -884,6 +907,4 @@ vim.cmd([[
     autocmd VimEnter * call CustomizeAirlineTheme()
   augroup END
 ]])
-
-
 
