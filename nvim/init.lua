@@ -1,25 +1,26 @@
 vim.opt.updatetime = 1
 
--- Decrease mapped sequence wait time
-vim.opt.timeoutlen = 1
-
 -- Configure how new splits should be opened
 vim.opt.splitright = true
 vim.opt.splitbelow = true
 vim.o.virtualedit = 'onemore'
 
 -- Sets how neovim will display certain whitespace characters in the editor.
-vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+-- vim.opt.list = true
+-- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
 
+vim.o.mouse = 'a'
+vim.opt.showmode = false      -- Hide -- INSERT -- etc.
+
 -- Show which line your cursor is on
 vim.opt.cursorline = true
+vim.opt.lazyredraw = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 15
+vim.opt.scrolloff = 4
 vim.o.number = true
 vim.opt.signcolumn = "yes:1"  -- or "yes:2" for 2 columns wide
 
@@ -33,10 +34,6 @@ vim.cmd [[highlight Normal guibg=NONE]]
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 --
--- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
--- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
-
 --
 --  See `:help wincmd` for a list of all window commands
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
@@ -76,10 +73,8 @@ require('lazy').setup
   -- sleuth: detect tabstop, shiftwidth automatically
   'tpope/vim-sleuth',
 
-
   -- cursorline: underline SELECTED VARIABLES
   --'ya2s/nvim-cursorline',
-
 
   -- illuminate: gitsigns [+, -, `]`]
   'RRethy/vim-illuminate',
@@ -97,6 +92,7 @@ require('lazy').setup
       signcolumn = true, -- Keep signcolumn on so the '+' shows up
     }
   },
+
 
 
   --
@@ -161,11 +157,6 @@ require('lazy').setup
     },
   },
 
-  -- NOTE: Plugins can specify dependencies.
-  --
-  -- The dependencies are proper plugin specifications as well - anything
-  -- you do for a plugin at the top level, you can do for a dependency.
-
 
   -- bufferline (windows tabs)
   {
@@ -179,7 +170,7 @@ require('lazy').setup
           diagnostics = 'nvim_lsp',
           show_buffer_close_icons = true,
           show_close_icon = false,
-          separator_style = 'thin', -- "slant" | "thick" | "thin" | { 'left', 'right' }
+          separator_style = 'thick', -- "slant" | "thick" | "thin" | { 'left', 'right' }
           offsets = {
             {
               filetype = "neo-tree",
@@ -195,6 +186,7 @@ require('lazy').setup
   },
 
 
+
   -- telescope (fuzzy Finder (files, lsp, etc))
   {
     'nvim-telescope/telescope.nvim',
@@ -207,8 +199,6 @@ require('lazy').setup
         -- `build` is used to run some command when the plugin is installed/updated.
         -- This is only run then, not every time Neovim starts up.
         build = 'make',
-        -- `cond` is a condition used to determine whether this plugin should be
-        -- installed and loaded.
         cond = function()
           return vim.fn.executable 'make' == 1
         end,
@@ -218,10 +208,8 @@ require('lazy').setup
     },
 
     config = function()
-      --
       -- [[ Configure Telescope ]]
       require('telescope').setup {
-        -- You can put your default mappings / updates / etc. in here
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
@@ -249,7 +237,6 @@ require('lazy').setup
 
   -- LSP plugins
   {
-    -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
     -- used for completion, annotations and signatures of Neovim apis
     'folke/lazydev.nvim',
     ft = 'lua',
@@ -259,13 +246,6 @@ require('lazy').setup
       },
     },
   },
-
-  {
-  "petertriho/nvim-scrollbar",
-  config = function()
-    require("scrollbar").setup()
-  end,
-},
 
   -- LSP configuration
   {
@@ -442,7 +422,6 @@ require('lazy').setup
         end)(),
         dependencies = {
           -- `friendly-snippets` contains a variety of premade snippets.
-          --    https://github.com/rafamadriz/friendly-snippets
           {
             'rafamadriz/friendly-snippets',
             config = function()
@@ -459,7 +438,6 @@ require('lazy').setup
       local cmp = require 'cmp'
       local luasnip = require 'luasnip'
       luasnip.config.setup {}
-
       cmp.setup {
         snippet = {
           expand = function(args)
@@ -467,7 +445,6 @@ require('lazy').setup
           end,
         },
         completion = { completeopt = 'menu,menuone,noinsert' },
-
         mapping = cmp.mapping.preset.insert {
           -- Select the [n]ext item
           ['<C-n>'] = cmp.mapping.select_next_item(),
@@ -481,12 +458,7 @@ require('lazy').setup
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
           -- ['<CR>'] = cmp.mapping.confirm { select = true },
-          -- Manually trigger a completion from nvim-cmp.
-          --  Generally you don't need this, because nvim-cmp will display
-          --  completions whenever it has completion options available.
           -- ['<C-Space>'] = cmp.mapping.complete {},
-          -- <c-l> will move you to the right of each of the expansion locations.
-          -- <c-h> is similar, except moving you backwards.
           ['<C-l>'] = cmp.mapping(function()
             if luasnip.expand_or_locally_jumpable() then
               luasnip.expand_or_jump()
@@ -525,57 +497,49 @@ require('lazy').setup
   },
 
 
-  -- airline
+  -- lualine 
   {
-    'vim-airline/vim-airline',
+    'nvim-lualine/lualine.nvim',
     dependencies = {
-      'vim-airline/vim-airline-themes',
+      'nvim-tree/nvim-web-devicons'
     },
-    init = function()
-      -- theme 
-      vim.g.airline_theme = 'zenburn'
-
-      -- Optional: Enable powerline fonts if you use them
-      vim.g.airline_powerline_fonts = 1
-          -- Disable ALE integration
-      vim.g['airline#extensions#ale#enabled'] = 0
-
-      -- Disable whitespace warnings
-      vim.g['airline#extensions#whitespace#enabled'] = 0
-
-      -- Disable LSP-related diagnostics
-      vim.g['airline#extensions#lsp#enabled'] = 0
-
-      -- Optional: Disable Coc (if used)
-      vim.g['airline#extensions#coc#enabled'] = 0
-    end,
-  },
-
-  -- highlight notes, comments
-  {
-    'folke/todo-comments.nvim',
-    event = 'VimEnter',
-    dependencies = { 'nvim-lua/plenary.nvim' },
-    opts = { signs = false },
-  },
-
-
-  -- neoscroll
-  {
-    "karb94/neoscroll.nvim",
     config = function()
-      require("neoscroll").setup({
-        -- Set `hide_cursor` to false if you want cursor to stay visible
-        hide_cursor = false,
-        stop_eof = true,
-        respect_scrolloff = true,
-        cursor_scrolls_alone = true,
-        easing_function = "linear", -- optional: "sine", "cubic", etc.
-        duration_multiplier = 1.0,   -- Global duration multiplier
-        performance_mode = false,    -- Disable "Performance Mode" on all buffers.
+        require('lualine').setup({
+          options = {
+              theme = 'default', -- or 'onedark', 'tokyonight', 'catppuccin'
+              -- section_separators = '',
+              component_separators = '',
+                -- Remove bold/italic styles
+              disabled_filetypes = {},
+              globalstatus = true,
+          },
+          --sections = {
+            --lualine_a = { { 'mode', fmt = function(str) return str:lower() end } },
+            --lualine_b = { 'branch' },
+            --lualine_c = { 'filename' },
+            --lualine_x = {},
+            --lualine_y = { 'filetype' },
+            --lualine_z = { 'location' },
+          --},
+        })
+    end
+  },
+
+
+  -- smooth sroll
+  {
+    'karb94/neoscroll.nvim',
+    config = function()
+      require('neoscroll').setup({
+          respect_scrolloff = false,   -- Stop scrolling when the cursor reaches the scrolloff margin of the file
+          cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
+          easing = "linear",
+          -- duration_multiplier = 20.0,   -- Global duration multiplier
+
       })
     end
   },
+
 
   -- mini.nvim
   {
@@ -586,19 +550,20 @@ require('lazy').setup
       -- add/delete/replace surroundings (brackets, quotes, etc.)
       require('mini.surround').setup()
       require('mini.pairs').setup()
-      -- require('mini.map').setup()
+      require('mini.map').setup()
       -- require('mini.indentscope').setup()
     end,
   },
 
-  -- highlight  code
+  -- highlight code
   {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs',
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 
-                            'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript' 
+      ensure_installed = { 
+        'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 
+        'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript' 
       },
       auto_install = true,
       highlight = {
@@ -627,7 +592,6 @@ require('lazy').setup
           [''] = 'rainbow-delimiters',
         },
         highlight = {
-          -- 'RainbowDelimiterRed',
           'RainbowDelimiterYellow',
           'RainbowDelimiterBlue',
           -- 'RainbowDelimiterOrange',
@@ -645,8 +609,8 @@ require('lazy').setup
     'nvim-treesitter/nvim-treesitter-context',
     config = function()
       require('treesitter-context').setup {
-        enable = true,
-        max_lines = 0,
+        enable = false,
+        max_lines = 1,
         mode = 'cursor',
         multiline_threshold = 20,
         separator = nil, -- disable dashed line under context
@@ -655,12 +619,37 @@ require('lazy').setup
     end,
   },
 
+  -- nvim scrollbar
+  --{
+  --  'petertriho/nvim-scrollbar',
+  --  config = function()
+  --  require("scrollbar").setup()
+  --  end
+  --},
+
+  -- scrollbar 
+  --{
+  --  'Xuyuanp/scrollbar.nvim',
+    -- no setup required
+  --  init = function()
+  --      local group_id = vim.api.nvim_create_augroup('scrollbar_init', { clear = true })
+
+  --      vim.api.nvim_create_autocmd({ 'BufEnter', 'WinScrolled', 'WinResized' }, {
+  --          group = group_id,
+  --          desc = 'Show or refresh scrollbar',
+  --          pattern = { '*' },
+  --          callback = function()
+  --              require('scrollbar').show()
+  --          end,
+  --      })
+  --  end,
+  --},
 
   -- following comments only work if you have downloaded the kickstart repo.
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree', <--- did my own
+  -- require 'kickstart.plugins.neo-tree', <--- my own
   {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x", -- or "v2.x" if you prefer stable
@@ -739,9 +728,9 @@ require('lazy').setup
 }
 
 vim.cmd [[highlight Normal guibg=NONE]]
--- vim.cmd [[highlight LineNr guibg=NONE guifg=NONE]]
+
 vim.cmd [[highlight SignColumn guibg=NONE]]
--- Make Neo-tree background transparent
+-- neo-tree background transparent
 vim.cmd [[highlight NeoTreeNormal guibg=NONE]] -- Transparent background for Neo-tree's main window
 vim.cmd [[highlight NeoTreeNormalNC guibg=NONE]] -- Transparent background for Neo-tree's non-current window
 vim.cmd [[highlight NeoTreeIndentMarker guibg=NONE]] -- Transparent background for Neo-tree's indent markers
@@ -831,7 +820,6 @@ vim.api.nvim_set_keymap(
 )
 
 
--- vim.cmd [[colorscheme tokyonight]]
 vim.cmd[[hi NvimTreeNormal guibg=NONE ctermbg=NONE]]
 
 
@@ -845,13 +833,13 @@ require("ibl").setup({
 
 -- neotree bindings
 vim.keymap.set("n", "<C-t>", ":Neotree toggle<CR>", { desc = "Toggle NeoTree" })
-vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function()
-    vim.defer_fn(function()
-      require("neo-tree.command").execute({ toggle = false, dir = vim.loop.cwd() })
-    end, 100) -- delay in ms
-  end,
-})
+--vim.api.nvim_create_autocmd("VimEnter", {
+--  callback = function()
+--    vim.defer_fn(function()
+--      require("neo-tree.command").execute({ toggle = false, dir = vim.loop.cwd() })
+--    end, 100) -- delay in ms
+--  end,
+--})
 vim.api.nvim_create_autocmd({ "WinEnter", "WinLeave" }, {
   callback = function()
     vim.cmd([[
@@ -875,36 +863,4 @@ vim.api.nvim_create_autocmd("ColorScheme", {
   end,
 })
 
-
--- disable neo tree airline 
-vim.cmd([[
-  augroup DisableAirlineInNeoTree
-    autocmd!
-    autocmd FileType neo-tree let g:airline_disable_auto = 1 | let g:airline#extensions#disable_rtp_load = 1
-  augroup END
-]])
-
-
--- airline theme
-vim.cmd([[
-  " Set airline section background to NONE (transparent)
-  highlight! AirlineNormal guibg=NONE ctermbg=NONE
-  highlight! AirlineInsert guibg=NONE ctermbg=NONE
-  highlight! AirlineVisual guibg=NONE ctermbg=NONE
-  highlight! AirlineReplace guibg=NONE ctermbg=NONE
-  highlight! AirlineInactive guibg=NONE ctermbg=NONE
-
-  " Optional: Make airline text slightly dim to simulate blur
-  highlight! AirlineNormal guifg=#7aa2f7 gui=bold
-]])
-vim.cmd([[
-  function! CustomizeAirlineTheme()
-    let g:airline#themes#zenburn#palette.insert.airline_a = ['#00ff00', '#3f3f3f', 10, 239]
-  endfunction
-
-  augroup AirlineZenburnCustom
-    autocmd!
-    autocmd VimEnter * call CustomizeAirlineTheme()
-  augroup END
-]])
 

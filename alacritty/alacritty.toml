@@ -4,8 +4,8 @@ TERM = "xterm-256color"
 WINIT_UNIX_BACKEND = "x11"
 
 [window]
-padding.x = 10
-padding.y = 10
+padding.x = 3
+padding.y = 3
 opacity = 0.68
 blur = true
 decorations = "Full"

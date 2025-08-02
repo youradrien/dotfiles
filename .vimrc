@@ -8,7 +8,7 @@ call plug#begin()
 
 Plug 'morhetz/gruvbox'
 Plug 'Yggdroot/indentLine'
-Plug 'psliwka/vim-smoothie'
+"Plug 'psliwka/vim-smoothie'
 Plug 'itchyny/lightline.vim'
 Plug 'sheerun/vim-polyglot'
 Plug 'jiangmiao/auto-pairs'
@@ -22,7 +22,7 @@ set guicursor=
 set termguicolors
 
 set smartindent
-set scrolloff=12
+set scrolloff=8
 set updatetime=2
 set number
 set statusline=%f 
