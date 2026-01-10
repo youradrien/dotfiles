@@ -1,13 +1,1 @@
-{
-  "dependencies": {
-    "coc-python": ">=1.2.13",
-    "coc-clangd": ">=0.30.2",
-    "coc-json": ">=1.9.2",
-    "coc-html": ">=1.8.0",
-    "coc-highlight": ">=2.0.4",
-    "coc-sql": ">=0.11.0",
-    "coc-graphql": ">=0.0.1",
-    "coc-lists": ">=1.5.1",
-    "coc-tsserver": ">=2.2.0"
-  }
-}
+{"dependencies":{}}

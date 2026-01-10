@@ -1,12 +1,11 @@
-
 [env]
 TERM = "xterm-256color"
 WINIT_UNIX_BACKEND = "x11"
 
 [window]
-padding.x = 3
+padding.x = 5
 padding.y = 3
-opacity = 0.68
+opacity = 0.75
 blur = true
 decorations = "Full"
 decorations_theme_variant = "Dark"
@@ -15,15 +14,35 @@ dynamic_padding = true
 
 
 [font]
-size = 13
-normal = { family = "SFMono Nerd Font", style = "Regular" }
-bold = { family = "SFMono Nerd Font", style = "Bold" }
+size = 11
+normal = { family = "SF Mono", style = "Regular" }
+bold = { family = "SF Mono", style = "Bold" }
 italic = { family = "SF Mono", style = "Italic" }
+offset = { x = 1, y = 0 }
 
-[general]
-import = [
-	"~/.config/alacritty/themes/themes/palenight.toml"
-]
+[colors]
+primary.background = "0x1c1c1c"
+primary.foreground = "0xfafafa"
+
+[colors.normal]
+black   = "0x000000"
+red     = "0xff5f5f"
+green   = "0x5fff5f"
+yellow  = "0xffff5f"
+blue    = "0x5f5fff"
+magenta = "0xff5fff"
+cyan    = "0x5fffff"
+white   = "0xffffff"
+
+[colors.bright]
+black   = "0x5c5c5c"
+red     = "0xff8787"
+green   = "0x87ff87"
+yellow  = "0xffff87"
+blue    = "0x8787ff"
+magenta = "0xff87ff"
+cyan    = "0x87ffff"
+white   = "0xffffff"
 
 [terminal.shell]
 	program = "/bin/zsh"
