@@ -66,3 +66,10 @@ fi
 
 # Export path tweaks (optional)
 export PATH="$HOME/bin:/usr/local/bin:$PATH"
+
+# Change the color of commands that don't exist
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
+ZSH_HIGHLIGHT_STYLES[unknown-command]='none'  # disables red
+
+# Only suggest after at least 2 characters typed
+ZSH_AUTOSUGGEST_MIN_CHARS=2
