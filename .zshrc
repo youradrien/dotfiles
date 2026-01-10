@@ -1,37 +1,41 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
-
-# Path to your Oh My Zsh installation.
+# Load Oh My Zsh
 export ZSH="$HOME/.oh-my-zsh"
-
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="robbyrussell"
+plugins=(
+	git 
+	zsh-autosuggestions 
+	zsh-syntax-highlighting 
+	zsh-completions
+)
 
-# CASE_SENSITIVE="true"
-# HYPHEN_INSENSITIVE="true"
+source $ZSH/oh-my-zsh.sh
+
+# ---- MY PLUGIN CONFIGURAITON (after plugin is loaded) ----
+# syntax highlighting: disable red for unknown commands
+ZSH_HIGHLIGHT_STYLES[unknown-token]='none'
+# Autosuggestions: require at least 2 chars
+ZSH_AUTOSUGGEST_MIN_CHARS=2
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8,italic'
+
+# CASE_SENSITIVE=true
+# HYPHEN_INSENSITIVE=true
+
+# disabled the underline: autocompletion
+(( ${+ZSH_HIGHLIGHT_STYLES} )) || typeset -A ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[path]=none
+ZSH_HIGHLIGHT_STYLES[path_prefix]=none
+
 
 # change how often to auto-update (in days).
 zstyle ':omz:update' frequency 2
 
 # Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
+# DISABLE_MAGIC_FUNCTIONS=true
 
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-plugins=(git)
-
-source $ZSH/oh-my-zsh.sh
-
-export PROMPT='%n@%m %1~ %# '
+source /Users/julessainthorant/.oh-my-zsh/oh-my-zsh.sh
 
 # User configuration
-# export MANPATH="/usr/local/man:$MANPATH"
-
+# export MANPATH=/usr/local/man:
 
 # History settings
 HISTSIZE=10000
@@ -40,23 +44,15 @@ HISTFILE=~/.zsh_history
 setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
 
-plugins=(
-  git
-  zsh-autosuggestions
-  zsh-syntax-highlighting
-  zsh-completions
-)
-
-
 # Enable command auto-suggestions (plugin)
 # Make sure this is AFTER Oh My Zsh is sourced
-if [ -f ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
-  source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [ -f /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+  source /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
 # Enable syntax highlighting (plugin)
-if [ -f ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
-  source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if [ -f /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+  source /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
 # FZF fuzzy finder integration (optional, if installed)
@@ -64,12 +60,3 @@ if [ -f ~/.fzf.zsh ]; then
   source ~/.fzf.zsh
 fi
 
-# Export path tweaks (optional)
-export PATH="$HOME/bin:/usr/local/bin:$PATH"
-
-# Change the color of commands that don't exist
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
-ZSH_HIGHLIGHT_STYLES[unknown-command]='none'  # disables red
-
-# Only suggest after at least 2 characters typed
-ZSH_AUTOSUGGEST_MIN_CHARS=2
