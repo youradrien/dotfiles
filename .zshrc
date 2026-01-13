@@ -2,11 +2,11 @@
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="robbyrussell"
 
-if [[ -n "$ALACRITTY" ]]; then
+# if [[ -n "$ALACRITTY" ]]; then
 	plugins=(
-		git 
-		zsh-autosuggestions 
-		zsh-syntax-highlighting 
+		git
+		zsh-autosuggestions
+		zsh-syntax-highlighting
 		zsh-completions
 	)
 
@@ -77,19 +77,22 @@ if [[ -n "$ALACRITTY" ]]; then
 	# Disable correction
 	unsetopt correct_all
 	unsetopt correct
-	DISABLE_CORRECTION="true" 
+	DISABLE_CORRECTION="true"
 
 	# change how often to auto-update (in days).
 	zstyle ':omz:update' frequency 2
 
 	# Initialize command prompt
-	export PROMPT='%n@%m %1~ %# '
+	# export PROMPT='%n@%m %1~ %# '
+	# export PROMPT='%{$fg[cyan]%}%n@%m %{$fg[green]%}%1~ %{$reset_color%}%# '
+	# export PROMPT='%n@%m %1~ %# '
+	# export PROMPT="%F{cyan}%n@%m%f %F{white}%1~%f %# "
 
 
 	# Uncomment the following line if pasting URLs and other text is messed up.
 	# DISABLE_MAGIC_FUNCTIONS=true
 
-	source /Users/julessainthorant/.oh-my-zsh/oh-my-zsh.sh
+	# source /Users/julessainthorant/.oh-my-zsh/oh-my-zsh.sh
 
 	# User configuration
 	# export MANPATH=/usr/local/man:
@@ -117,4 +120,4 @@ if [[ -n "$ALACRITTY" ]]; then
 	  source ~/.fzf.zsh
 	fi
 
-fi
+# fi
