@@ -1,4 +1,4 @@
-vim.opt.updatetime = 1
+vim.opt.updatetime = 100
 
 -- Configure how new splits should be opened
 vim.opt.splitright = true
@@ -23,6 +23,7 @@ vim.opt.lazyredraw = true
 vim.opt.scrolloff = 4
 vim.o.number = true
 vim.opt.signcolumn = "yes:1"  -- or "yes:2" for 2 columns wide
+vim.opt.signcolumn = "no"
 
 -- J.
 vim.o.scroll = 1 -- Scroll by 1 line at a time
@@ -34,14 +35,16 @@ vim.cmd [[highlight Normal guibg=NONE]]
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 --
---
---  See `:help wincmd` for a list of all window commands
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+-- clean, vim default tabline, status/ruler messages
 vim.opt.showmode = false
+vim.opt.ruler = false
+vim.opt.showcmd = false
+
 
 -- highlight when yanking (copying) text
 vim.api.nvim_create_autocmd('TextYankPost',
@@ -73,90 +76,6 @@ require('lazy').setup
   -- sleuth: detect tabstop, shiftwidth automatically
   'tpope/vim-sleuth',
 
-  -- cursorline: underline SELECTED VARIABLES
-  --'ya2s/nvim-cursorline',
-
-  -- illuminate: gitsigns [+, -, `]`]
-  'RRethy/vim-illuminate',
-  {
-    'lewis6991/gitsigns.nvim',
-    opts = {
-      signs = {
-        add          = { text = '+' },
-        change       = { text = '~' },
-        delete       = { text = '_' },
-        topdelete    = { text = '' },
-        changedelete = { text = '' },
-        untracked    = { text = '' },
-      },
-      signcolumn = true, -- Keep signcolumn on so the '+' shows up
-    }
-  },
-
-
-
-  --
-  -- This is often very useful to both group configuration, as well as handle
-  -- lazy loading plugins that don't need to be loaded immediately at startup.
-  -- For example, in the following configuration, we use:
-  --  event = 'VimEnter'
-  -- which loads which-key before all the UI elements are loaded. Events can be
-  -- normal autocommands events (`:help autocmd-events`).
-  --
-  { -- Useful plugin to show you pending keybinds.
-    'folke/which-key.nvim',
-    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-    opts = {
-      delay = 0,
-      icons = {
-        -- set icon mappings to true if you have a Nerd Font
-        mappings = vim.g.have_nerd_font,
-        -- If you are using a Nerd Font: set icons.keys to an empty table which will use the
-        -- default which-key.nvim defined Nerd Font icons, otherwise define a string table
-        keys = vim.g.have_nerd_font and {} or {
-          Up = '<Up> ',
-          Down = '<Down> ',
-          Left = '<Left> ',
-          Right = '<Right> ',
-          C = '<C-…> ',
-          M = '<M-…> ',
-          D = '<D-…> ',
-          S = '<S-…> ',
-          CR = '<CR> ',
-          Esc = '<Esc> ',
-          ScrollWheelDown = '<ScrollWheelDown> ',
-          ScrollWheelUp = '<ScrollWheelUp> ',
-          NL = '<NL> ',
-          BS = '<BS> ',
-          Space = '<Space> ',
-          Tab = '<Tab> ',
-          F1 = '<F1>',
-          F2 = '<F2>',
-          F3 = '<F3>',
-          F4 = '<F4>',
-          F5 = '<F5>',
-          F6 = '<F6>',
-          F7 = '<F7>',
-          F8 = '<F8>',
-          F9 = '<F9>',
-          F10 = '<F10>',
-          F11 = '<F11>',
-          F12 = '<F12>',
-        },
-      },
-
-      spec = {
-        { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
-        { '<leader>d', group = '[D]ocument' },
-        { '<leader>r', group = '[R]ename' },
-        { '<leader>s', group = '[S]earch' },
-        { '<leader>w', group = '[W]orkspace' },
-        { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
-      },
-    },
-  },
-
 
   -- bufferline (windows tabs)
   {
@@ -170,7 +89,7 @@ require('lazy').setup
           diagnostics = 'nvim_lsp',
           show_buffer_close_icons = true,
           show_close_icon = false,
-          separator_style = 'thick', -- "slant" | "thick" | "thin" | { 'left', 'right' }
+          separator_style = 'thin', -- "slant" | "thick" | "thin" | { 'left', 'right' }
           offsets = {
             {
               filetype = "neo-tree",
@@ -184,6 +103,8 @@ require('lazy').setup
       }
     end,
   },
+
+
 
 
 
@@ -235,6 +156,8 @@ require('lazy').setup
   },
 
 
+
+
   -- LSP plugins
   {
     -- used for completion, annotations and signatures of Neovim apis
@@ -246,6 +169,11 @@ require('lazy').setup
       },
     },
   },
+
+
+
+
+
 
   -- LSP configuration
   {
@@ -281,24 +209,13 @@ require('lazy').setup
             vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
-          -- Jump to the definition of the word under your cursor.
-          --  This is where a variable was first declared, or where a function is defined, etc.
-          --  To jump back, press <C-t>.
           map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
-
-          -- Find references for the word under your cursor.
           map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-
-          -- Jump to the implementation of the word under your cursor.
-          --  Useful when your language has ways of declaring types without an actual implementation.
           map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
 
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
           map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-
-          -- Execute a code action, usually your cursor needs to be on top of an error
-          -- or a suggestion from your LSP for this to activate.
           map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
 
           -- WARN: This is not Goto Definition, this is Goto Declaration.
@@ -407,6 +324,10 @@ require('lazy').setup
   },
 
 
+
+
+
+
   -- Autocompletion
   {
     'hrsh7th/nvim-cmp',
@@ -484,6 +405,8 @@ require('lazy').setup
   },
 
 
+
+
   -- nvim colorscheme
   {
     'folke/tokyonight.nvim',
@@ -497,6 +420,8 @@ require('lazy').setup
   },
 
 
+
+
   -- lualine 
   {
     'nvim-lualine/lualine.nvim',
@@ -506,62 +431,26 @@ require('lazy').setup
     config = function()
         require('lualine').setup({
           options = {
-              theme = 'default', -- or 'onedark', 'tokyonight', 'catppuccin'
+              theme = 'auto', -- or 'onedark', 'tokyonight', 'catppuccin'
               -- section_separators = '',
               component_separators = '',
-                -- Remove bold/italic styles
-              disabled_filetypes = {},
-              globalstatus = true,
           },
-          --sections = {
-            --lualine_a = { { 'mode', fmt = function(str) return str:lower() end } },
-            --lualine_b = { 'branch' },
-            --lualine_c = { 'filename' },
-            --lualine_x = {},
-            --lualine_y = { 'filetype' },
-            --lualine_z = { 'location' },
-          --},
         })
     end
   },
 
 
-  -- smooth sroll
-  {
-    'karb94/neoscroll.nvim',
-    config = function()
-      require('neoscroll').setup({
-          respect_scrolloff = false,   -- Stop scrolling when the cursor reaches the scrolloff margin of the file
-          cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
-          easing = "linear",
-          -- duration_multiplier = 20.0,   -- Global duration multiplier
-
-      })
-    end
-  },
 
 
-  -- mini.nvim
-  {
-    'echasnovski/mini.nvim',
-    config = function()
-      -- better Around/Inside textobjects
-      require('mini.ai').setup { n_lines = 500 }
-      -- add/delete/replace surroundings (brackets, quotes, etc.)
-      require('mini.surround').setup()
-      require('mini.pairs').setup()
-      require('mini.map').setup()
-      -- require('mini.indentscope').setup()
-    end,
-  },
 
-  -- highlight code
+
+  -- highlight code (treesitter)
   {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs',
     opts = {
-      ensure_installed = { 
+      ensure_installed = {
         'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 
         'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript' 
       },
@@ -578,77 +467,11 @@ require('lazy').setup
   },
 
 
-  -- colored indented parentheses
-  {
-    'HiPhish/rainbow-delimiters.nvim',
-    config = function()
-      local rainbow_delimiters = require 'rainbow-delimiters'
-
-      vim.g.rainbow_delimiters = {
-        strategy = {
-          [''] = rainbow_delimiters.strategy['global'],
-        },
-        query = {
-          [''] = 'rainbow-delimiters',
-        },
-        highlight = {
-          'RainbowDelimiterYellow',
-          'RainbowDelimiterBlue',
-          -- 'RainbowDelimiterOrange',
-          'RainbowDelimiterGreen',
-          'RainbowDelimiterViolet',
-          'RainbowDelimiterCyan',
-        },
-      }
-    end,
-  },
-
-
-  -- treesitter context 
-  {
-    'nvim-treesitter/nvim-treesitter-context',
-    config = function()
-      require('treesitter-context').setup {
-        enable = false,
-        max_lines = 1,
-        mode = 'cursor',
-        multiline_threshold = 20,
-        separator = nil, -- disable dashed line under context
-        zindex = 20,
-      }
-    end,
-  },
-
-  -- nvim scrollbar
-  --{
-  --  'petertriho/nvim-scrollbar',
-  --  config = function()
-  --  require("scrollbar").setup()
-  --  end
-  --},
-
-  -- scrollbar 
-  --{
-  --  'Xuyuanp/scrollbar.nvim',
-    -- no setup required
-  --  init = function()
-  --      local group_id = vim.api.nvim_create_augroup('scrollbar_init', { clear = true })
-
-  --      vim.api.nvim_create_autocmd({ 'BufEnter', 'WinScrolled', 'WinResized' }, {
-  --          group = group_id,
-  --          desc = 'Show or refresh scrollbar',
-  --          pattern = { '*' },
-  --          callback = function()
-  --              require('scrollbar').show()
-  --          end,
-  --      })
-  --  end,
-  --},
 
   -- following comments only work if you have downloaded the kickstart repo.
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
-  require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.autopairs', 
   -- require 'kickstart.plugins.neo-tree', <--- my own
   {
     "nvim-neo-tree/neo-tree.nvim",
@@ -787,23 +610,6 @@ vim.api.nvim_create_autocmd('ColorScheme', {
     end
   end,
 })
-require('bufferline').setup {
-  highlights = {
-    background = {
-      fg = '#808080',
-      bg = 'NONE',
-    },
-    buffer_selected = {
-      fg = '#ffffff',
-      bg = 'NONE',
-      bold = true,
-    },
-    buffer_visible = {
-      fg = '#a0a0a0',
-      bg = 'NONE',
-    },
-  },
-}
 vim.cmd 'doautocmd ColorScheme'
 vim.cmd [[
   highlight BufferLineBufferSelected guibg=NONE guifg=NONE gui=bold
@@ -862,5 +668,7 @@ vim.api.nvim_create_autocmd("ColorScheme", {
     vim.api.nvim_set_hl(0, "NeoTreeIndentMarker", { bg = "NONE" })
   end,
 })
+
+
 
 
