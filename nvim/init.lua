@@ -1,13 +1,7 @@
-vim.opt.updatetime = 100
+vim.opt.updatetime = 50
 
--- Configure how new splits should be opened
-vim.opt.splitright = true
-vim.opt.splitbelow = true
 vim.o.virtualedit = 'onemore'
 
--- Sets how neovim will display certain whitespace characters in the editor.
--- vim.opt.list = true
--- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
@@ -19,34 +13,53 @@ vim.opt.showmode = false      -- Hide -- INSERT -- etc.
 vim.opt.cursorline = true
 vim.opt.lazyredraw = true
 
--- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 4
-vim.o.number = true
-vim.opt.signcolumn = "yes:1"  -- or "yes:2" for 2 columns wide
-vim.opt.signcolumn = "no"
+-- indentation
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+vim.opt.autoindent = true
+vim.opt.number = true
 
 -- J.
 vim.o.scroll = 1 -- Scroll by 1 line at a time
 vim.o.mousescroll = 'ver:1'
 vim.cmd [[highlight Normal guibg=NONE]]
 
--- [[ Basic Keymaps ]]
--- Clear highlights on search when pressing <Esc> in normal mode
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
---
+
+-- backup and undo
+vim.opt.swapfile = false
+vim.opt.backup = false
+vim.opt.undofile = true
+
+-- UI
+vim.opt.scrolloff = 6
+vim.opt.signcolumn = "yes"
+vim.opt.showmode = false
+vim.opt.guicursor = ""
+
+-- clipboard
+vim.opt.clipboard:append("unnamedplus")
+
+-- window splits
+vim.opt.splitright = true
+vim.opt.splitbelow = true
+
+
+-- KEYMAPS
+local opts = {noremap = true, silent = true}
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
--- clean, vim default tabline, status/ruler messages
-vim.opt.showmode = false
-vim.opt.ruler = false
-vim.opt.showcmd = false
+vim.keymap.set("v", "j", ":m '>+1<CR>gv=gv", {desc = 'moec WHOLE lines UP and DOWN using VISUAL mode'})
+vim.keymap.set("v", "k", ":m '<-2<CR>gv=gv", {desc = 'moec WHOLE lines UP and DOWN using VISUAL mode'})
 
+vim.keymap.set("v", "<", "<gv", opts)
+vim.keymap.set("v", ">", ">gv", opts)
 
--- highlight when yanking (copying) text
+vim.keymap.set("n", "<C-c>", ":nohl<CR>", {desc= "clear SEARCH highlight with CTRL-C"})
+vim.keymap.set("n", "Q", "<nop>")
+
+-- highlight  yanking (copying) text
 vim.api.nvim_create_autocmd('TextYankPost',
   {
     desc = 'Highlight when yanking (copying) text',
@@ -55,6 +68,9 @@ vim.api.nvim_create_autocmd('TextYankPost',
       vim.highlight.on_yank()
     end,
 })
+
+
+
 
 
 -- [[ Install `lazy.nvim` plugin manager ]]
@@ -115,44 +131,42 @@ require('lazy').setup
     branch = '0.1.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
-      {
-        'nvim-telescope/telescope-fzf-native.nvim',
-        -- `build` is used to run some command when the plugin is installed/updated.
-        -- This is only run then, not every time Neovim starts up.
-        build = 'make',
-        cond = function()
-          return vim.fn.executable 'make' == 1
-        end,
-      },
+      { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make'},
       { 'nvim-telescope/telescope-ui-select.nvim' },
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+      { 'andrew-george/telescope-themes'}
     },
-
     config = function()
-      -- [[ Configure Telescope ]]
-      require('telescope').setup {
-        -- pickers = {}
-        extensions = {
-          ['ui-select'] = {
-            require('telescope.themes').get_dropdown(),
-          },
-        },
-      }
+      local telescope = require("telescope")
+      local actions = require("telescope.actions")
+      local builtin = require("telescope.builtin")
 
-      pcall(require('telescope').load_extension, 'fzf')
-      pcall(require('telescope').load_extension, 'ui-select')
+      telescope.load_extension("fzf")
+      telescope.load_extension("themes")
 
-      local builtin = require 'telescope.builtin'
-      vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
-      vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
-      vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
-      vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
-      vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
-    end,
+      telescope.setup({
+          defaults = {
+            path_display = { "smart" },
+            mapping = {
+              i = {
+                ["C<-k>"] = actions.move_selection_previous,
+                ["C<-j>"] = actions.move_selection_next,
+              },
+            },
+            extensions = {
+              themes = {
+                  enable_previewer = true,
+                  enable_live_previewer = true,
+                  persist = {
+                    enabled = true,
+                    path = vim.fn.stdpath('config') .. "lua/colorscheme.lua",
+                  }
+              }
+            }
+          }
+      })
+
+    end
   },
 
 
@@ -199,11 +213,7 @@ require('lazy').setup
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
-          -- NOTE: Remember that Lua is a real programming language, and as such it is possible
-          -- to define small helper and utility functions so you don't have to repeat yourself.
           --
-          -- In this case, we create a function that lets us more easily define mappings specific
-          -- for LSP related items. It sets the mode, buffer and description for us each time.
           local map = function(keys, func, desc, mode)
             mode = mode or 'n'
             vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
@@ -224,7 +234,6 @@ require('lazy').setup
 
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
-          --    See `:help CursorHold` for information about when this is executed
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
@@ -429,12 +438,52 @@ require('lazy').setup
       'nvim-tree/nvim-web-devicons'
     },
     config = function()
+        local lazy_status = require("lazy.status")
+		local lualine = require("lualine")
+        local mode = {
+            'mode',
+            fmt = function(str)
+                -- return ' ' 
+                -- displays only the first character of the mode
+                return ' ' .. str
+            end,
+        }
+        local diff = {
+            'diff',
+            colored = true,
+            symbols = { added = ' ', modified = ' ', removed = ' ' }, -- changes diff symbols
+            -- cond = hide_in_width,
+        }
+        local filename = {
+            'filename',
+            file_status = true,
+            path = 0,
+        }
+        local branch = {'branch', icon = {'', color={fg='#A6D4DE'}}, '|'}
+
         require('lualine').setup({
           options = {
               theme = 'auto', -- or 'onedark', 'tokyonight', 'catppuccin'
               -- section_separators = '',
-              component_separators = '',
+        	  component_separators = { left = "|", right = "|" },
           },
+          sections = {
+              lualine_a = { mode },
+              lualine_b = { branch },
+              lualine_c = { diff, filename },
+              lualine_x = {
+                  {
+                      -- require("noice").api.statusline.mode.get,
+                      -- cond = require("noice").api.statusline.mode.has,
+                      lazy_status.updates,
+                      cond = lazy_status.has_updates,
+                      color = { fg = "#ff9e64" },
+                  },
+                  -- { "encoding",},
+                  -- { "fileformat" },
+                  { "filetype" },
+              },
+		  },
         })
     end
   },
