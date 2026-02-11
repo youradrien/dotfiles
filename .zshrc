@@ -5,7 +5,7 @@ ZSH_THEME="robbyrussell"
 # if [[ -n "$ALACRITTY" ]]; then
 	plugins=(
 		git
-		zsh-autosuggestions
+		# zsh-autosuggestions
 		zsh-syntax-highlighting
 		zsh-completions
 	)
@@ -104,11 +104,10 @@ ZSH_THEME="robbyrussell"
 	setopt INC_APPEND_HISTORY
 	setopt SHARE_HISTORY
 
-	# Enable command auto-suggestions (plugin)
-	# Make sure this is AFTER Oh My Zsh is sourced
-	if [ -f /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
-	  source /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-	fi
+	# auto-suggestions (plugin)
+	#if [ -f /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+	#  source /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+	#fi
 
 	# Enable syntax highlighting (plugin)
 	if [ -f /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
