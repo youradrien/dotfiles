@@ -7,7 +7,7 @@ ZSH_THEME="robbyrussell"
 		git
 		# zsh-autosuggestions
 		zsh-syntax-highlighting
-		zsh-completions
+		# zsh-completions
 	)
 
 
