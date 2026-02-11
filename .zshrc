@@ -1,13 +1,14 @@
-# Load Oh My Zsh
-export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="robbyrussell"
+if [[ 1 -eq 0 ]]; then
 
-# if [[ -n "$ALACRITTY" ]]; then
+	# Load Oh My Zsh
+	export ZSH="$HOME/.oh-my-zsh"
+	ZSH_THEME="robbyrussell"
+
 	plugins=(
-		git
-		# zsh-autosuggestions
-		zsh-syntax-highlighting
-		# zsh-completions
+		git 
+		zsh-autosuggestions 
+		zsh-syntax-highlighting 
+		zsh-completions
 	)
 
 
@@ -77,7 +78,7 @@ ZSH_THEME="robbyrussell"
 	# Disable correction
 	unsetopt correct_all
 	unsetopt correct
-	DISABLE_CORRECTION="true"
+	DISABLE_CORRECTION="true" 
 
 	# change how often to auto-update (in days).
 	zstyle ':omz:update' frequency 2
@@ -104,10 +105,11 @@ ZSH_THEME="robbyrussell"
 	setopt INC_APPEND_HISTORY
 	setopt SHARE_HISTORY
 
-	# auto-suggestions (plugin)
-	#if [ -f /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
-	#  source /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-	#fi
+	# Enable command auto-suggestions (plugin)
+	# Make sure this is AFTER Oh My Zsh is sourced
+	if [ -f /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+	  source /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+	fi
 
 	# Enable syntax highlighting (plugin)
 	if [ -f /Users/julessainthorant/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
@@ -119,4 +121,22 @@ ZSH_THEME="robbyrussell"
 	  source ~/.fzf.zsh
 	fi
 
-# fi
+fi
+
+
+if [[ 1 -eq 1 ]]; then
+      # Function to get current Git branch
+      git_branch() {
+	  local branch
+	  branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || return
+	  # Print in cyan
+	  echo "%F{cyan}${branch}%f"
+      }
+
+      # Enable prompt substitution
+      setopt PROMPT_SUBST
+
+      # Your prompt: path + git branch in cyan + normal prompt char
+      PROMPT='%n@%m %~ $(git_branch) %# '
+
+fi
